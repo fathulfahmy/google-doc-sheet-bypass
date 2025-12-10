@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Google Doc Sheet Bypass</title>
+    <link rel="stylesheet" href="/static/bootstrap.min.css" />
+    <script>
+      let counter = 1;
+
+      function updateRemoveButtons() {
+        const containers = document.getElementById("documentIds").children;
+        const disable = containers.length === 1;
+        for (const container of containers) {
+          const removeBtn = container.querySelector("button.btn-danger");
+          if (removeBtn) removeBtn.disabled = disable;
+        }
+      }
+
+      function addField(afterContainer) {
+        counter++;
+
+        const container = document.createElement("div");
+        container.className = "d-flex mb-2 align-items-center";
+        container.id = "container_" + counter;
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = "doc_id[]";
+        input.id = "doc_id_" + counter;
+        input.className = "form-control";
+
+        const addBtn = document.createElement("button");
+        addBtn.type = "button";
+        addBtn.className = "btn btn-secondary rounded text-nowrap";
+        addBtn.textContent = "Add another";
+        addBtn.onclick = () => addField(container);
+
+        const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "btn btn-danger rounded text-nowrap";
+        removeBtn.textContent = "Delete";
+        removeBtn.onclick = () => {
+          container.remove();
+          updateRemoveButtons();
+        };
+
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "d-flex gap-1 ms-2";
+        buttonContainer.appendChild(addBtn);
+        buttonContainer.appendChild(removeBtn);
+
+        container.appendChild(input);
+        container.appendChild(buttonContainer);
+
+        if (afterContainer) {
+          afterContainer.after(container);
+        } else {
+          document.getElementById("documentIds").appendChild(container);
+        }
+
+        updateRemoveButtons();
+      }
+
+      window.onload = () => addField(null);
+    </script>
+  </head>
+  <body class="p-5">
+    <div class="container">
+      <h2 class="mb-1">Google Doc Sheet Bypass</h2>
+      <p class="mb-5">Bypass Docs and Sheets print and download permission</p>
+
+      <form action="/download" method="post">
+        <div class="mb-3">
+          <label class="form-label me-2"><span class="fw-bold">Step 1:</span> Select document type</label>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="doc_type" id="docx" value="docx" checked />
+            <label class="form-check-label" for="docx">Docs to docx</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="doc_type" id="csv" value="csv" />
+            <label class="form-check-label" for="csv">Sheets to csv</label>
+          </div>
+        </div>
+
+        <label class="form-label"><span class="fw-bold">Step 2:</span> Enter document ID</label>
+        <div class="mb-2 p-3 border rounded bg-light">
+          <span class="fw-bold">EXAMPLE: </span>
+          <span>https://docs.google.com/document/d/</span>
+          <span class="bg-warning text-dark">12QwErT345YuI6780P</span>
+          <span>/edit</span>
+          <br />
+          <span class="text-secondary">NOTE: Require public or shared link with view access</span>
+        </div>
+        <div id="documentIds" class="mb-3"></div>
+
+        <button type="submit" class="d-block btn btn-primary">Download all</button>
+      </form>
+    </div>
+  </body>
+</html>
